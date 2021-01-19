@@ -1,13 +1,16 @@
-language: minimal
+language: node_js
+node_js:
+  - 13
+
 services: docker
+
+env:
+  - DOCKER_COMPOSE_VERSION=1.4.2
 
 # safelist
 branches:
   only:
   - master
-
-env:
-  - DOCKER_COMPOSE_VERSION=1.4.2
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
@@ -15,8 +18,11 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - echo "installed docker-compose"
+  - docker-compose --version
+
+install:
+  - cat docker-compose-build.yaml
+  - docker-compose -f docker-compose-build.yaml build --parallel --no-cache
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - echo "Logged in to DockerHub"
-install:
-  - docker-compose -f docker-compose-build.yaml build --parallel --no-cache
   - docker-compose -f docker-compose-build.yaml push
