@@ -1,8 +1,14 @@
 language: minimal
+
 services: docker
 
 env:
-  - DOCKER_COMPOSE_VERSION=1.4.2
+  - DOCKER_COMPOSE_VERSION=1.25.5
+
+# safelist
+branches:
+  only:
+  - master
 
 before_install:
   - sudo rm /usr/local/bin/docker-compose
@@ -10,8 +16,10 @@ before_install:
   - chmod +x docker-compose
   - sudo mv docker-compose /usr/local/bin
   - echo "installed docker-compose"
+  - echo docker-compose --version
+
+install:
+  - docker-compose -f docker-compose-build.yaml build --parallel
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - echo "Logged in to DockerHub"
-install:
-  - docker-compose -f docker-compose-build.yaml build --parallel 
   - docker-compose -f docker-compose-build.yaml push
