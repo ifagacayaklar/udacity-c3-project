@@ -1,6 +1,11 @@
 language: minimal
 services: docker
 
+# safelist
+branches:
+  only:
+  - master
+
 env:
   - DOCKER_COMPOSE_VERSION=1.4.2
 
@@ -13,5 +18,5 @@ before_install:
   - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
   - echo "Logged in to DockerHub"
 install:
-  - docker-compose -f docker-compose-build.yaml build --parallel 
+  - docker-compose -f docker-compose-build.yaml build --parallel --no-cache
   - docker-compose -f docker-compose-build.yaml push
