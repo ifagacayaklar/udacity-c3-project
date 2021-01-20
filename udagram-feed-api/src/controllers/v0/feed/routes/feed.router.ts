@@ -5,6 +5,7 @@ import * as jwt from 'jsonwebtoken';
 import * as AWS from '../../../../aws';
 import * as c from '../../../../config/config';
 import { v4 as uuid } from 'uuid';
+import { AnyARecord } from 'dns';
 
 const router: Router = Router();
 
@@ -27,20 +28,16 @@ export function requireAuth(req: Request, res: Response, next: NextFunction) {
   });
 }
 
-function getUserName (req : Request){
+function getUserName (req : Request): string {
   try {
     const tokenBearer = req.headers.authorization.split(' ');
     if (tokenBearer.length != 2){
       throw new Error('Error');
     }
     const token = tokenBearer[1];
-    jwt.verify(token, c.config.jwt.secret, (err, decoded) => {
-      if (err) {
-        throw(err);
-      }else{
-        return decoded;
-      }
-    });
+    const decoded: any = jwt.verify(token, c.config.jwt.secret);
+    return decoded.email
+    
   } catch (err){
     return "Anonym";
   }
@@ -57,15 +54,16 @@ function logFeed (req: Request, username: string, pid: string, before: boolean )
 // Get all feed items
 router.get('/', async (req: Request, res: Response) => {
   const pid = uuid();
-  const username = getUserName(req);
-  logFeed(req, username, pid, true);
+  const username = await getUserName(req);
+  console.log(username)
+  await logFeed(req, username, pid, true);
   const items = await FeedItem.findAndCountAll({order: [['id', 'DESC']]});
   items.rows.map((item) => {
     if (item.url) {
       item.url = AWS.getGetSignedUrl(item.url);
     }
   });
-  logFeed(req, username, pid, false);
+  await logFeed(req, username, pid, false);
   res.send(items);
 });
 
