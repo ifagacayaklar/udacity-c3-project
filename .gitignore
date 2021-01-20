@@ -1,3 +1,6 @@
 #Ignore all env
 .env
 *.sh
+Secret.yaml
+configMap.yaml
+aws_secret.yaml
