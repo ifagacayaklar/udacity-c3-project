@@ -1,0 +1,34 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: udagram-frontend
+  labels:
+    app: udagram-frontend
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: udagram-frontend
+  template:
+    metadata:
+      labels:
+        app: udagram-frontend
+    spec:
+      containers:
+      - name: udagram-frontend
+        image: ifagacayaklar/udagram-frontend
+        envFrom:
+          - configMapRef:
+              name: udagram-config
+          - secretRef:
+              name: udagram-secrets
+        volumeMounts:
+          - name: aws-secret
+            mountPath: "/root/.aws/"
+            readOnly: true
+        ports:
+        - containerPort: 80
+      volumes:
+        - name: aws-secret
+          secret:
+            secretName: aws-secret
